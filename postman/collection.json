@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "Bishal Puja Sewa API",
+    "description": "API collection for the Secure Hindu Ritual Service Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/register",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"test@example.com\", \"password\": \"TestPass123!\", \"full_name\": \"Test User\", \"phone\": \"9841234567\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"test@example.com\", \"password\": \"TestPass123!\"}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/refresh",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refresh_token\": \"{{refresh_token}}\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pandits",
+      "item": [
+        {
+          "name": "List Pandits",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/pandits"
+          }
+        },
+        {
+          "name": "Get Pandit",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/pandits/{{pandit_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/bookings",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{access_token}}"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pandit_id\": \"{{pandit_id}}\", \"ritual_id\": \"{{ritual_id}}\", \"scheduled_date\": \"2025-01-15\", \"start_time\": \"08:00\", \"end_time\": \"10:00\", \"address\": \"Kathmandu\"}"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "base_url", "value": "http://localhost:8080/api/v1"},
+    {"key": "access_token", "value": ""},
+    {"key": "refresh_token", "value": ""},
+    {"key": "pandit_id", "value": ""},
+    {"key": "ritual_id", "value": ""}
+  ]
+}

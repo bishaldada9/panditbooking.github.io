@@ -1,0 +1,18 @@
+services:
+  backend:
+    environment:
+      - APP_ENV=development
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      target: builder
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html

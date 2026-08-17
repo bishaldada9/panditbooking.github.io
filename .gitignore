@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server
+
+# Test binary
+*.test
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Certificates
+*.pem
+*.key
+certs/
+
+# Uploads
+uploads/
+temp/

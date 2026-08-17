@@ -1,0 +1,112 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_HOST_PORT:-8081}:8080"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=ritual_user
+      - DB_PASSWORD=${DB_PASSWORD:-ritual_pass_secure}
+      - DB_NAME=hindu_ritual_db
+      - DB_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-super-secret-jwt-key-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-super-secret-refresh-key-change-in-production}
+      - CORS_ALLOWED_ORIGINS=http://localhost:${FRONTEND_HOST_PORT:-3000},http://127.0.0.1:${FRONTEND_HOST_PORT:-3000}
+      - PAYMENT_MOCK_MODE=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - ritual-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ritual-network
+
+  seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: seed
+    restart: "no"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=ritual_user
+      - DB_PASSWORD=${DB_PASSWORD:-ritual_pass_secure}
+      - DB_NAME=hindu_ritual_db
+      - DB_SSLMODE=disable
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - ritual-network
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=ritual_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-ritual_pass_secure}
+      - POSTGRES_DB=hindu_ritual_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ritual_user -d hindu_ritual_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ritual-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ritual-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  ritual-network:
+    driver: bridge
